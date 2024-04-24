@@ -3,10 +3,9 @@ extends Control
 @export var pixel_ins:PackedScene
 
 var game_end:bool = false
-var snake_skill:bool = false
 var key_input:int = 3
 var time:float
-var snake_speed:float = 0.1
+var snake_speed:float = 0.2
 var board:Array
 var pixel_board:Array
 var point:Sprite2D
@@ -18,6 +17,7 @@ var snake_body:Array = []
 var temp_snake_body:Array
 var snake_start_body:Array
 var snake_end_body:Array
+var snake_change:bool = false
 
 signal key_changed(key:int)
 
@@ -47,22 +47,38 @@ func _ready():
 	create_point()
 
 func on_key_changed(key:int):
-	prints("key_________",key,key_input,"_____")
+	#prints("key_________",key,key_input,"_____")
 	# di chuyen doc
 	if key != key_input:
 		if snake_body.size() > 1:
 			if (key < 2 and key_input < 2) or (key > 1 and key_input > 1):
-				#prints("snake_skill_________",key,key_input,"_____",true)
-				snake_skill = true
+				snake_change = true
 			else:
-				#prints("snake_skill_________",key,key_input,"_____",false)
-				snake_skill = false
-			if snake_skill == true:
-				"""
+				snake_change = false
+			if snake_change == true:
+				var end0:Array = snake_body[snake_body.size()-2]
+				var end1:Array = snake_body[snake_body.size()-1]
+				# doc
+				if end0[1] == end1[1]:
+					if end0[0] == board[0].size()-1 and end1[0] == 0:
+						key = 0
+					elif end0[0] == 0 and end1[0] == board[0].size()-1:
+						key = 1
+					elif end0[0] > end1[0]:
+						key = 0
+					elif end0[0] < end1[0]:
+						key = 1
+				# ngang
+				elif end0[0] == end1[0]:
+					if end0[1] == 0 and end1[1] == board.size()-1:
+						key = 2
+					elif end0[1] == board.size()-1 and end1[1] == 0:
+						key = 3
+					elif end0[1] > end1[1]:
+						key = 2
+					elif end0[1] < end1[1]:
+						key = 3
 				
-				"""
-				#prints("Change input")
-				#prints(snake_body[snake_body.size()-2],snake_body[snake_body.size()-1])
 				var temp0:Array = []
 				var temp1:Array = []
 				for i in range(snake_body.size()-1,-1,-1):
@@ -108,7 +124,7 @@ func _process(delta):
 		
 		# eat
 		var point:Sprite2D = pixel_board[snake_body[0][0]][snake_body[0][1]]
-		if point.modulate == Color.GREEN and snake_skill == false:
+		if point.modulate == Color.GREEN and snake_change == false:
 			game_end = true
 			prints("")
 			prints("Game End")
