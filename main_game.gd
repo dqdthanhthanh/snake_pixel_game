@@ -2,28 +2,28 @@ extends Control
 
 @export var pixel_ins:PackedScene
 
-var old_key_input:int = 3
+var game_end:bool = false
+var snake_skill:bool = false
 var key_input:int = 3
 var time:float
-var snake_speed:float = 0.2
+var snake_speed:float = 0.1
 var board:Array
 var pixel_board:Array
 var point:Sprite2D
-var move_x:int = 0
-var move_y:int = 0
+var pixel_x:int = 0
+var pixel_y:int = 0
 var snake:Sprite2D
-var snake_size:int = 5
+var snake_size:int = 1
 var snake_body:Array = []
-var count_body_create:int = snake_size-2
 var temp_snake_body:Array
 var snake_start_body:Array
-
-var snake_body_create:int = 0
-var snake_turn_pos:Array
 var snake_end_body:Array
+
+signal key_changed(key:int)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	connect("key_changed",on_key_changed)
 	# create board
 	for i in 11:
 		board.append([])
@@ -43,102 +43,105 @@ func _ready():
 				pixel.position.x = 32 + j * 64
 				pixel_board[i][j] = pixel
 			pixel.position.y = 32 + i * 64
-		
 	create_snake()
 	create_point()
+
+func on_key_changed(key:int):
+	prints("key_________",key,key_input,"_____")
+	# di chuyen doc
+	if key != key_input:
+		if snake_body.size() > 1:
+			var temp:Array
+			if (key < 2 and key_input < 2) or (key > 1 and key_input > 1):
+				prints("snake_skill_________",key,key_input,"_____",true)
+				snake_skill = true
+			else:
+				prints("snake_skill_________",key,key_input,"_____",false)
+				snake_skill = false
+			if snake_skill == true:
+				temp = snake_body[0]
+				snake_body[0] = snake_body[snake_body.size()-1]
+				snake_body[snake_body.size()-1] = temp
+		key_input = key
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	time += delta
 	
-	if time > snake_speed:
-		prints("_____")
-		snake_body_create += 1
-		
-		# create head
-		snake_body[0] = [move_y, move_x]
-		
-		# eat
-		var point:Sprite2D = pixel_board[snake_body[0][0]][snake_body[0][1]]
-		if point.modulate == Color.RED:
-			create_point()
-			snake_size += 1
-			snake_body.append(snake_end_body)
-			temp_snake_body.append(snake_end_body)
-			
+	if time > snake_speed and game_end == false:
+		snake_start_body = [pixel_x, pixel_y]
 		
 		match key_input:
 			0:
-				move_y -= 1
+				pixel_x -= 1
 			1:
-				move_y += 1
+				pixel_x += 1
 			2:
-				move_x -= 1
+				pixel_y -= 1
 			3:
-				move_x += 1
+				pixel_y += 1
 		
-		if move_x > board[0].size()-1 or abs(move_x) > board[0].size()-1:
-			move_x = 0
-		if move_y > board.size()-1 or abs(move_y) > board.size()-1:
-			move_y = 0
+		if pixel_y > board[0].size()-1 or abs(pixel_y) > board[0].size()-1:
+			pixel_y = 0
+		if pixel_x > board.size()-1 or abs(pixel_x) > board.size()-1:
+			pixel_x = 0
 		
-		# create head
-		prints("0 create head")
-		snake_start_body = snake_body[0]
-		snake = pixel_board[snake_start_body[0]][snake_start_body[1]]
+		snake_body[0] = [pixel_x, pixel_y]
+		#prints("")
+		#prints("Snake Move",snake_body,temp_snake_body)
 		
-		if snake_body_create > 1:
-			prints("1 create first body")
-			snake_body[1] = snake_turn_pos
-			snake = pixel_board[snake_turn_pos[0]][snake_turn_pos[1]]
+		# eat
+		var point:Sprite2D = pixel_board[snake_body[0][0]][snake_body[0][1]]
+		if point.modulate == Color.GREEN and snake_skill == false:
+			game_end = true
+			prints("")
+			prints("Game End")
+			prints("")
+		if point.modulate == Color.RED:
+			var s:int = 1
+			var body_x:int = pixel_x
+			var body_y:int = pixel_y
+			
+			match key_input:
+				0:
+					body_y += s
+				1:
+					body_y -= s
+				2:
+					body_x += s
+				3:
+					body_x -= s
+			
+			if body_x > board.size()-1 or abs(body_x) > board.size()-1:
+				body_x = 0
+				pixel_x = 0
+			if body_y > board[0].size()-1 or abs(body_y) > board[0].size()-1:
+				body_y = 0
+				pixel_y = 0
+			
+			snake_size += 1
+			snake_end_body = [body_x,body_y]
+			snake_body.append(snake_end_body)
+			temp_snake_body.append(snake_body[0])
+			create_point()
+			prints("")
+			prints("Snake Eat",snake_body,temp_snake_body)
+			prints("")
 		
-		prints("snake_body", snake_body)
-		
-		if snake_body_create > 2 and snake_body_create-1 < snake_size:
-			prints("2 create new body")
-			var temp_count = count_body_create
+		# create all body data when snake_size > 1
+		if snake_size > 1:
 			for i in snake_size:
-				if i > 1 and count_body_create > 0:
-					if snake_body[i].size() == 0: 
-						count_body_create -= 1
-					var s:int = 1
-					var body_y:int = snake_body[i-1][0]
-					var body_x:int = snake_body[i-1][1]
-					
-					match key_input:
-						0:
-							body_y += s
-						1:
-							body_y -= s
-						2:
-							body_x += s
-						3:
-							body_x -= s
-					
-					if body_y > board.size()-1 or abs(body_y) > board.size()-1:
-						body_y = 0
-						move_y = 0
-					if body_x > board[0].size()-1 or abs(body_x) > board[0].size()-1:
-						body_x = 0
-						move_x = 0
-					snake_body[i] = [body_y,body_x]
-					if temp_count != count_body_create:
-						break
-		prints("snake_body_create",snake_body_create)
-		
-		# recreate all body
-		if snake_body_create > snake_size:
-			for i in snake_size:
-				if i > 1 and snake_body[i].size() > 0:
+				if i > 0:
 					snake_body[i] = temp_snake_body[i-1]
-			# delete_end_body
-			snake_end_body = [temp_snake_body[temp_snake_body.size()-1][0],temp_snake_body[temp_snake_body.size()-1][1]]
-			snake = pixel_board[snake_end_body[0]][snake_end_body[1]]
-			snake.modulate = Color.WHITE
+		
+		# deleta end body
+		snake_end_body = [temp_snake_body[temp_snake_body.size()-1][0],temp_snake_body[temp_snake_body.size()-1][1]]
+		snake = pixel_board[snake_end_body[0]][snake_end_body[1]]
+		snake.modulate = Color.WHITE
 		
 		temp_snake_body = snake_body.duplicate(true)
 		
-		# create_head, body
+		# create head, body display
 		for n in snake_body.size():
 			if snake_body[n].size() > 0:
 				snake = pixel_board[snake_body[n][0]][snake_body[n][1]]
@@ -147,109 +150,45 @@ func _process(delta):
 				else:
 					snake.modulate = Color.GREEN
 		
-		prints("snake_body", snake_body)
-		prints("temp_snake_body", temp_snake_body)
-		
-		# snake_turn_pos
-		snake_turn_pos = snake_body[0]
-		snake_body[1] = snake_turn_pos
+		#prints("snake_body", snake_body)
+		#prints("temp_snake_body", temp_snake_body)
 	
 	if time > snake_speed:
 		time = 0
-
-func create_snake():
-	"""
-	snake_size = 3
-	
-	snake_body_create = 1
-	tao dau
-	
-	snake_body_create = 2
-	tao dau
-	than 1 = snake_turn_pos
-	
-	snake_body_create = snake_size
-	tao dau
-	than 1 = snake_turn_pos
-	duoi = than 1
-	
-	snake_body_create > snake_size
-	tao dau
-	than 1 = snake_turn_pos
-	duoi = than 1
-	xoa duoi
-	
-	"""
-	for i in snake_size:
-		snake_body.append([])
-	temp_snake_body = snake_body
-	move_y = randi_range(int(pixel_board.size()/2-1),int(pixel_board.size()/2+1))
-	move_x = randi_range(int(pixel_board[0].size()/2-1),int(pixel_board[0].size()/2+1))
-
-func create_point():
-	if point != null:
-		point.modulate = Color.WHITE
-	point = create_obj()
-	point.modulate = Color.RED
 
 func _input(event):
 	if Input.is_action_pressed("ui_accept"):
 		create_snake()
 		create_point()
 	
-	#if (Input.is_action_pressed("ui_up")
-	#or Input.is_action_pressed("ui_down")
-	#or Input.is_action_pressed("ui_left")
-	#or Input.is_action_pressed("ui_right")):
-		#pass
-	
 	if Input.is_action_pressed("ui_up"):
-		if key_input != 0:
-			if key_input > 1:
-				move_x = snake_body[0][1]
-			elif key_input < 2:
-				snake = pixel_board[snake_body[0][0]][snake_body[0][1]]
-				snake.modulate = Color.WHITE
-				move_x = snake_body[snake_body.size()-1][1]
-			move_y = snake_body[snake_body.size()-1][0]
-			snake_turn_pos = [move_y,move_x]
-			key_input = 0
+		key_changed.emit(0)
 	elif Input.is_action_pressed("ui_down"):
-		if key_input != 1:
-			if key_input > 1:
-				move_x = snake_body[0][1]
-			elif key_input < 2:
-				snake = pixel_board[snake_body[0][0]][snake_body[0][1]]
-				snake.modulate = Color.WHITE
-				move_x = snake_body[snake_body.size()-1][1]
-			move_y = snake_body[snake_body.size()-1][0]
-			snake_turn_pos = [move_y,move_x]
-			key_input = 1
+		key_changed.emit(1)
 	elif Input.is_action_pressed("ui_left"):
-		if key_input != 2:
-			if key_input > 1:
-				move_y = snake_body[snake_body.size()-1][0]
-				snake = pixel_board[snake_body[0][0]][snake_body[0][1]]
-				snake.modulate = Color.WHITE
-			elif key_input < 2:
-				move_y = snake_body[0][0]
-			move_x = snake_body[snake_body.size()-1][1]
-			snake_turn_pos = [move_y,move_x]
-			key_input = 2
+		key_changed.emit(2)
 	elif Input.is_action_pressed("ui_right"):
-		if key_input != 3:
-			if key_input > 1:
-				move_y = snake_body[snake_body.size()-1][0]
-				snake = pixel_board[snake_body[0][0]][snake_body[0][1]]
-				snake.modulate = Color.WHITE
-			elif key_input < 2:
-				move_y = snake_body[0][0]
-			move_x = snake_body[snake_body.size()-1][1]
-			snake_turn_pos = [move_y,move_x]
-			key_input = 3
+		key_changed.emit(3)
 
-func create_obj() -> Sprite2D:
-	var i = randi_range(0,pixel_board.size()-1)
-	var j = randi_range(0,pixel_board[0].size()-1)
-	var obj:Sprite2D = pixel_board[i][j]
-	return obj
+func create_snake():
+	prints("")
+	for i in snake_size:
+		snake_body.append([])
+	pixel_x = randi_range(int(pixel_board.size()/2-1),int(pixel_board.size()/2+1))
+	pixel_y = randi_range(int(pixel_board[0].size()/2-1),int(pixel_board[0].size()/2+1))
+	snake_body[0] = [pixel_x,pixel_y]
+	temp_snake_body = snake_body
+	prints("Create Snake____",snake_body[0])
+	prints("")
+
+func create_point():
+	prints("")
+	var ok_point:Array
+	for child in $Board.get_children():
+		if child.modulate != Color.GREEN:
+			ok_point.append(child)
+	point = ok_point.pick_random()
+	point.modulate = Color.RED
+	ok_point.clear()
+	prints("Create Point____",point)
+	prints("")
