@@ -51,17 +51,29 @@ func on_key_changed(key:int):
 	# di chuyen doc
 	if key != key_input:
 		if snake_body.size() > 1:
-			var temp:Array
 			if (key < 2 and key_input < 2) or (key > 1 and key_input > 1):
-				prints("snake_skill_________",key,key_input,"_____",true)
+				#prints("snake_skill_________",key,key_input,"_____",true)
 				snake_skill = true
 			else:
-				prints("snake_skill_________",key,key_input,"_____",false)
+				#prints("snake_skill_________",key,key_input,"_____",false)
 				snake_skill = false
 			if snake_skill == true:
-				temp = snake_body[0]
-				snake_body[0] = snake_body[snake_body.size()-1]
-				snake_body[snake_body.size()-1] = temp
+				"""
+				
+				"""
+				#prints("Change input")
+				#prints(snake_body[snake_body.size()-2],snake_body[snake_body.size()-1])
+				var temp0:Array = []
+				var temp1:Array = []
+				for i in range(snake_body.size()-1,-1,-1):
+					temp0.append(snake_body[i])
+					temp1.append(temp_snake_body[i])
+				snake_body = temp0.duplicate(true)
+				temp_snake_body = temp1.duplicate(true)
+				temp0 = []
+				temp1 = []
+				pixel_x = snake_body[0][0]
+				pixel_y = snake_body[0][1]
 		key_input = key
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -81,10 +93,14 @@ func _process(delta):
 			3:
 				pixel_y += 1
 		
-		if pixel_y > board[0].size()-1 or abs(pixel_y) > board[0].size()-1:
-			pixel_y = 0
 		if pixel_x > board.size()-1 or abs(pixel_x) > board.size()-1:
 			pixel_x = 0
+		if pixel_y > board[0].size()-1 or abs(pixel_y) > board[0].size()-1:
+			pixel_y = 0
+		if pixel_x < 0:
+			pixel_x = remap(pixel_x,-(board.size()-1),-1,1,board.size()-1)
+		if pixel_y < 0:
+			pixel_y = remap(pixel_y,-(board[0].size()-1),-1,1,board[0].size()-1)
 		
 		snake_body[0] = [pixel_x, pixel_y]
 		#prints("")
@@ -118,6 +134,10 @@ func _process(delta):
 			if body_y > board[0].size()-1 or abs(body_y) > board[0].size()-1:
 				body_y = 0
 				pixel_y = 0
+			if body_x < 0:
+				body_x = remap(body_x,-(board.size()-1),-1,1,board.size()-1)
+			if body_y < 0:
+				body_y = remap(body_y,-(board[0].size()-1),-1,1,board[0].size()-1)
 			
 			snake_size += 1
 			snake_end_body = [body_x,body_y]
@@ -142,10 +162,10 @@ func _process(delta):
 		temp_snake_body = snake_body.duplicate(true)
 		
 		# create head, body display
-		for n in snake_body.size():
-			if snake_body[n].size() > 0:
-				snake = pixel_board[snake_body[n][0]][snake_body[n][1]]
-				if n == 0:
+		for i in snake_body.size():
+			if snake_body[i].size() > 0:
+				snake = pixel_board[snake_body[i][0]][snake_body[i][1]]
+				if i == 0:
 					snake.modulate = Color.BLUE
 				else:
 					snake.modulate = Color.GREEN
