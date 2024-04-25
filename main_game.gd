@@ -5,7 +5,7 @@ extends Control
 var game_end:bool = false
 var key_input:int = 3
 var time:float
-var snake_speed:float = 0.2
+var snake_speed:float = 0.3
 var board:Array
 var pixel_board:Array
 var point:Sprite2D
@@ -226,5 +226,7 @@ func create_point():
 	point = ok_point.pick_random()
 	point.modulate = Color.RED
 	ok_point.clear()
+	snake_speed = snake_speed/100.0*98.0
 	prints("Create Point____",point)
+	prints("New Speed", snake_speed)
 	prints("")
