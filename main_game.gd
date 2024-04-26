@@ -81,6 +81,9 @@ func on_new_game():
 	snake_speed = 0.3
 	snake_size = 1
 	snake_body = []
+	temp_snake_body = []
+	snake_start_body = []
+	snake_end_body = []
 	snake_change = false
 	
 	# create board color
@@ -103,6 +106,7 @@ func on_game_end():
 	prints("Game End")
 	prints("")
 	game_end = true
+	await get_tree().create_timer(1,false).timeout
 	btn_new_game.show()
 
 func on_key_changed(key:int):
