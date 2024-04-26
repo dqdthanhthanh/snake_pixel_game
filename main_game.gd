@@ -43,6 +43,15 @@ func _ready():
 				pixel.position.x = 32 + j * 64
 				pixel_board[i][j] = pixel
 			pixel.position.y = 32 + i * 64
+	# create wall:
+	# ngang
+	for i in board[0].size():
+		pixel_board[0][i].modulate = Color.BLACK
+		pixel_board[board.size()-1][i].modulate = Color.BLACK
+	# doc
+	for i in board.size():
+		pixel_board[i][0].modulate = Color.BLACK
+		pixel_board[i][board[0].size()-1].modulate = Color.BLACK
 	create_snake()
 	create_point()
 
@@ -124,7 +133,7 @@ func _process(delta):
 		
 		# eat
 		var point:Sprite2D = pixel_board[snake_body[0][0]][snake_body[0][1]]
-		if point.modulate == Color.GREEN and snake_change == false:
+		if (point.modulate == Color.GREEN and snake_change == false) or point.modulate == Color.BLACK:
 			game_end = true
 			prints("")
 			prints("Game End")
@@ -218,15 +227,15 @@ func create_snake():
 	prints("")
 
 func create_point():
-	prints("")
 	var ok_point:Array
 	for child in $Board.get_children():
-		if child.modulate != Color.GREEN:
+		if child.modulate == Color(1,1,1,1):
 			ok_point.append(child)
 	point = ok_point.pick_random()
 	point.modulate = Color.RED
 	ok_point.clear()
 	snake_speed = snake_speed/100.0*98.0
+	prints("")
 	prints("Create Point____",point)
 	prints("New Speed", snake_speed)
 	prints("")
