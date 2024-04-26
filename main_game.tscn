@@ -22,7 +22,7 @@ border_width_right = 16
 border_width_bottom = 16
 border_color = Color(0, 0, 0, 1)
 
-[node name="MainGame" type="Control" node_paths=PackedStringArray("score_label", "high_score_label", "your_score_label", "data")]
+[node name="MainGame" type="Control" node_paths=PackedStringArray("btn_new_game", "score_label", "high_score_label", "your_score_label", "data")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,6 +30,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_wbjgo")
+btn_new_game = NodePath("ButtonNewGame")
 score_label = NodePath("ScoreLabel")
 high_score_label = NodePath("ButtonNewGame/HighScoreLabel")
 your_score_label = NodePath("ButtonNewGame/YourScore")
