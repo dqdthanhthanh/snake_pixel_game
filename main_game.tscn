@@ -1,8 +1,28 @@
-[gd_scene load_steps=2 format=3 uid="uid://c3fnpugnvmh60"]
+[gd_scene load_steps=8 format=3 uid="uid://c3fnpugnvmh60"]
 
 [ext_resource type="Script" path="res://main_game.gd" id="1_wbjgo"]
+[ext_resource type="Texture2D" uid="uid://bobthp6gd5e4t" path="res://white_square.png" id="2_ubevi"]
+[ext_resource type="PackedScene" uid="uid://dqjmumsv02kpn" path="res://pixel.tscn" id="3_j77nn"]
+[ext_resource type="FontFile" uid="uid://cfnbrw8sdu01e" path="res://game_over.ttf" id="4_oc6gi"]
+[ext_resource type="Script" path="res://Data.gd" id="5_pcp5l"]
 
-[node name="MainGame" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thllg"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 16
+border_width_top = 16
+border_width_right = 16
+border_width_bottom = 16
+border_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vccfv"]
+bg_color = Color(0.497474, 0.497474, 0.497474, 1)
+border_width_left = 16
+border_width_top = 16
+border_width_right = 16
+border_width_bottom = 16
+border_color = Color(0, 0, 0, 1)
+
+[node name="MainGame" type="Control" node_paths=PackedStringArray("btn_new_game", "score_label", "high_score_label", "your_score_label", "data")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,5 +30,115 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_wbjgo")
+pixel_ins = ExtResource("3_j77nn")
+btn_new_game = NodePath("ButtonNewGame")
+score_label = NodePath("ScoreLabel")
+high_score_label = NodePath("ButtonNewGame/HighScoreLabel")
+your_score_label = NodePath("ButtonNewGame/YourScore")
+data = NodePath("Data")
+
+[node name="BG" type="Sprite2D" parent="."]
+self_modulate = Color(0, 0, 0, 1)
+position = Vector2(540, 360)
+scale = Vector2(1080, 720)
+texture = ExtResource("2_ubevi")
 
 [node name="Board" type="Node2D" parent="."]
+
+[node name="ScoreLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 64.0
+offset_right = 256.0
+offset_bottom = 64.0
+theme_override_fonts/font = ExtResource("4_oc6gi")
+theme_override_font_sizes/font_size = 80
+text = "Score: 0"
+vertical_alignment = 1
+
+[node name="ButtonNewGame" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -128.0
+offset_right = 160.0
+offset_bottom = 128.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("4_oc6gi")
+theme_override_font_sizes/font_size = 100
+theme_override_styles/normal = SubResource("StyleBoxFlat_thllg")
+theme_override_styles/hover = SubResource("StyleBoxFlat_vccfv")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_vccfv")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_vccfv")
+theme_override_styles/focus = SubResource("StyleBoxFlat_vccfv")
+
+[node name="HighScoreLabel" type="Label" parent="ButtonNewGame"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -128.0
+offset_top = 24.0
+offset_right = 128.0
+offset_bottom = 88.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("4_oc6gi")
+theme_override_font_sizes/font_size = 80
+text = "Record: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="YourScore" type="Label" parent="ButtonNewGame"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -128.0
+offset_top = -40.0
+offset_right = 128.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("4_oc6gi")
+theme_override_font_sizes/font_size = 80
+text = "Score: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Info" type="Label" parent="ButtonNewGame"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -128.0
+offset_top = -88.0
+offset_right = 128.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("4_oc6gi")
+theme_override_font_sizes/font_size = 80
+text = "Click to play"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Data" type="Node" parent="."]
+script = ExtResource("5_pcp5l")
