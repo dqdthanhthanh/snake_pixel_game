@@ -1,10 +1,14 @@
-[gd_scene load_steps=8 format=3 uid="uid://c3fnpugnvmh60"]
+[gd_scene load_steps=12 format=3 uid="uid://c3fnpugnvmh60"]
 
-[ext_resource type="Script" path="res://main_game.gd" id="1_wbjgo"]
-[ext_resource type="Texture2D" uid="uid://bobthp6gd5e4t" path="res://white_square.png" id="2_ubevi"]
-[ext_resource type="PackedScene" uid="uid://dqjmumsv02kpn" path="res://pixel.tscn" id="3_j77nn"]
-[ext_resource type="FontFile" uid="uid://cfnbrw8sdu01e" path="res://game_over.ttf" id="4_oc6gi"]
-[ext_resource type="Script" path="res://data.gd" id="5_pcp5l"]
+[ext_resource type="Script" path="res://script/main_game.gd" id="1_wbjgo"]
+[ext_resource type="Texture2D" uid="uid://bobthp6gd5e4t" path="res://2d/white_square.png" id="2_ubevi"]
+[ext_resource type="PackedScene" uid="uid://dqjmumsv02kpn" path="res://scene/pixel.tscn" id="3_j77nn"]
+[ext_resource type="FontFile" uid="uid://cfnbrw8sdu01e" path="res://font/game_over.ttf" id="4_oc6gi"]
+[ext_resource type="Script" path="res://script/data.gd" id="5_pcp5l"]
+[ext_resource type="AudioStream" uid="uid://c3fkj8h3iwe3m" path="res://sound/food.mp3" id="6_8c428"]
+[ext_resource type="AudioStream" uid="uid://d1jufhxguxi2x" path="res://sound/gameover.mp3" id="7_iay04"]
+[ext_resource type="AudioStream" uid="uid://bbda5fxaoca2h" path="res://sound/move.mp3" id="8_ufcu2"]
+[ext_resource type="AudioStream" uid="uid://ci3alwckohnc2" path="res://sound/button_click.mp3" id="9_2nage"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thllg"]
 bg_color = Color(1, 1, 1, 1)
@@ -22,7 +26,7 @@ border_width_right = 16
 border_width_bottom = 16
 border_color = Color(0, 0, 0, 1)
 
-[node name="MainGame" type="Control" node_paths=PackedStringArray("btn_new_game", "score_label", "high_score_label", "your_score_label", "data")]
+[node name="MainGame" type="Control" node_paths=PackedStringArray("btn_new_game", "score_label", "high_score_label", "your_score_label", "input_sfx", "eat_sfx", "end_sfx", "move_sfx", "data")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -34,6 +38,10 @@ btn_new_game = NodePath("ButtonNewGame")
 score_label = NodePath("ScoreLabel")
 high_score_label = NodePath("ButtonNewGame/HighScoreLabel")
 your_score_label = NodePath("ButtonNewGame/YourScore")
+input_sfx = NodePath("Sounds/InputSFX")
+eat_sfx = NodePath("Sounds/EatSFX")
+end_sfx = NodePath("Sounds/EndSFX")
+move_sfx = NodePath("Sounds/MoveSFX")
 data = NodePath("Data")
 pixel_ins = ExtResource("3_j77nn")
 
@@ -142,3 +150,17 @@ vertical_alignment = 1
 
 [node name="Data" type="Node" parent="."]
 script = ExtResource("5_pcp5l")
+
+[node name="Sounds" type="Node" parent="."]
+
+[node name="EatSFX" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource("6_8c428")
+
+[node name="EndSFX" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource("7_iay04")
+
+[node name="MoveSFX" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource("8_ufcu2")
+
+[node name="InputSFX" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource("9_2nage")

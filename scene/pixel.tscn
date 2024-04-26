@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dqjmumsv02kpn"]
 
-[ext_resource type="Texture2D" uid="uid://bobthp6gd5e4t" path="res://white_square.png" id="1_0y16w"]
+[ext_resource type="Texture2D" uid="uid://bobthp6gd5e4t" path="res://2d/white_square.png" id="1_0y16w"]
 
 [node name="Sprite2D" type="Sprite2D"]
 position = Vector2(32, 32)

@@ -9,6 +9,11 @@ extends Control
 @export var score_label:Label
 @export var high_score_label:Label
 @export var your_score_label:Label
+# am thanh
+@export var input_sfx:AudioStreamPlayer
+@export var eat_sfx:AudioStreamPlayer
+@export var end_sfx:AudioStreamPlayer
+@export var move_sfx:AudioStreamPlayer
 # du lieu game: xem trong script data
 @export var data:Node
 # pixel scene
@@ -16,6 +21,8 @@ extends Control
 
 # kiem tra game ket thuc hay chua
 var game_end:bool = true
+# kiem tra game pase hay ko
+var game_pause:bool = false
 # kiem tra nut duoc nhan: 0 len, 1 xuong, 2 trai, 3 phai
 var key_input:int = 3
 # thoi gian de ran di chuyen: time += delta cho den khi time = snake_speed thi ran di chuyen
@@ -29,8 +36,8 @@ var pixel_y:int = 0
 var board:Array
 # lua tru cac diem pixel
 var pixel_board:Array
-# diem ran co the an
-var point:Sprite2D
+# thuc an ran co the an
+var food:Sprite2D
 # ran
 var snake:Sprite2D
 # chieu dai cua ran, diem an duoc = snake_size - 1
@@ -104,7 +111,6 @@ func _ready():
 func on_new_game():
 	# reset value
 	time = 0
-	key_input = 3
 	snake_speed = 0.3
 	snake_size = 1
 	snake_body = []
@@ -121,11 +127,12 @@ func on_new_game():
 	# create all object
 	create_wall()
 	create_snake()
-	create_point()
+	create_food()
 	signal_score_add.emit()
 	
 	# create new game
 	game_end = false
+	game_pause = game_end
 	btn_new_game.hide()
 
 # khi game ket thuc: ran dam vao tuong, dam vao chinh no
@@ -133,7 +140,9 @@ func on_game_end():
 	prints("")
 	prints("Game End")
 	prints("")
+	end_sfx.play()
 	game_end = true
+	game_pause = game_end
 	await get_tree().create_timer(1,false).timeout
 	btn_new_game.show()
 
@@ -164,23 +173,23 @@ func create_snake():
 	prints("Create Snake____",snake_body[0])
 	prints("")
 
-# tao ra diem, khac voi vi tri cua ran, dong thoi tang toc do cua ran sau moi diem an duoc
-func create_point():
-	var ok_point:Array
+# tao ra thuc an, khac voi vi tri cua ran, dong thoi tang toc do cua ran sau moi diem an duoc
+func create_food():
+	var ok_foods:Array
 	for child in $Board.get_children():
 		if child.modulate == Color(1,1,1,1):
-			ok_point.append(child)
-	point = ok_point.pick_random()
-	point.modulate = point_color
-	ok_point.clear()
+			ok_foods.append(child)
+	food = ok_foods.pick_random()
+	food.modulate = point_color
+	ok_foods.clear()
 	snake_speed = snake_speed/100.0*98.0
 	prints("")
-	prints("Create Point____",point)
+	prints("Create Food____",food)
 	prints("New Speed", snake_speed)
 	prints("")
 
-# xu ly cac phim duoc nhan: di chuyen ran
-func _input(event):
+# xu ly cac phim duoc nhan de di chuyen ran
+func _unhandled_key_input(event):
 	if Input.is_action_pressed("ui_up"):
 		signal_key_changed.emit(0)
 	elif Input.is_action_pressed("ui_down"):
@@ -190,8 +199,24 @@ func _input(event):
 	elif Input.is_action_pressed("ui_right"):
 		signal_key_changed.emit(3)
 
+# xu ly phim menu
+func _input(event):
+	# new game
+	if event.is_pressed() and game_end == true and btn_new_game.visible == true:
+		game_end = false
+		on_new_game()
+	# pause game
+	elif Input.is_key_label_pressed(KEY_ESCAPE) and game_end == false:
+		if game_pause == false:
+			game_pause = true
+			btn_new_game.visible = game_pause
+		else:
+			game_pause = false
+			btn_new_game.visible = game_pause
+
 # khi co phim duoc nhan
 func on_key_changed(key:int):
+	input_sfx.play()
 	# chi xu ly khi nhan phim khac
 	if key != key_input:
 		if snake_body.size() > 1:
@@ -240,6 +265,7 @@ func on_key_changed(key:int):
 
 # khi ran an: them 1 phan bo phan cho ran, tao 1 diem moi tren map
 func on_snale_eat():
+	eat_sfx.play()
 	# vi tri bo phan them vao
 	var s:int = 1
 	var body_x:int = pixel_x
@@ -271,7 +297,7 @@ func on_snale_eat():
 	snake_body.append(snake_end_body)
 	temp_snake_body.append(snake_body[0])
 	# tao 1 diem moi tren map
-	create_point()
+	create_food()
 	prints("")
 	prints("Snake Eat",snake_body,temp_snake_body)
 	prints("")
@@ -297,11 +323,12 @@ func on_score_add():
 # xu ly ran di chuyen
 func _process(delta):
 	# chi hoat dong khi game dang chay: game_end = false
-	if game_end == false:
+	if game_end == false and game_pause == false:
 		# thoi gian de ran di chuyen: time += delta cho den khi time >= snake_speed thi ran di chuyen
 		time += delta
 		# ran di chuyen
 		if time >= snake_speed:
+			move_sfx.play()
 			# tim vi tri dau moi cua ran sau khi di chuyen
 			# dua vao phim duoc nhan moi nhan
 			match key_input:
