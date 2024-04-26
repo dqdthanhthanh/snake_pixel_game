@@ -195,10 +195,11 @@ func on_score_add():
 	data.data = data.get_data()
 	if score > data.data.record:
 		data.data.record = score
+		high_score_label.text = "New Record: " + str(score)
 		data.save_data(data.data)
 	else:
 		score = data.data.record
-	high_score_label.text = "Record: " + str(score)
+		high_score_label.text = "Record: " + str(score)
 	score_label.text = "Score: " + str(snake_size - 1)
 	your_score_label.text = "Score: " + str(snake_size - 1)
 
@@ -270,10 +271,6 @@ func _process(delta):
 			time = 0
 
 func _input(event):
-	if Input.is_action_pressed("ui_accept"):
-		create_snake()
-		create_point()
-	
 	if Input.is_action_pressed("ui_up"):
 		signal_key_changed.emit(0)
 	elif Input.is_action_pressed("ui_down"):
