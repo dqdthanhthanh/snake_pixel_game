@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Snake Game"
+config/name="Snake Pixel Game"
 run/main_scene="res://scene/main_game.tscn"
 config/features=PackedStringArray("4.2", "Mobile")
 config/icon="res://snake_pixel_game_icon.png"

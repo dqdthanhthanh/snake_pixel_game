@@ -26,16 +26,14 @@ var game_pause:bool = false
 # kiem tra nut duoc nhan: 0 len, 1 xuong, 2 trai, 3 phai
 var key_input:int = 3
 # thoi gian de ran di chuyen: time += delta cho den khi time = snake_speed thi ran di chuyen
-var time:float = 0
+var time_input:float = 0
 # toc do cua ran
 var snake_speed:float = 0.3
 # toa do di chuyen cua ran theo chieu ngang x, doc y
 var pixel_x:int = 0
 var pixel_y:int = 0
 # lua tru toa do, vi tri cua cac diem pixel
-var board:Array
-# lua tru cac diem pixel
-var pixel_board:Array
+var board_data:Array
 # thuc an ran co the an
 var food:Sprite2D
 # ran
@@ -84,22 +82,19 @@ func _ready():
 	
 	# tao data dua vao kich thuoc man hinh xac dinh hoac tuy chon x = 17, y = 11
 	for i in round(size.y/64):
-		board.append([])
+		board_data.append([])
 		for j in round(size.x/64):
-			board[i].append(0)
-	pixel_board = board.duplicate(true)
+			board_data[i].append(0)
 	# them vao cac diem pixel dua data co duoc o tren
-	for i in board.size():
-		for j in board[i].size():
+	for i in board_data.size():
+		for j in board_data[i].size():
 			var pixel:Sprite2D = pixel_ins.instantiate()
 			$Board.add_child(pixel)
 			pixel.modulate = board_color
 			if j == 0:
 				pixel.position.x = 32
-				pixel_board[i][0] = pixel
 			else:
 				pixel.position.x = 32 + j * 64
-				pixel_board[i][j] = pixel
 			pixel.position.y = 32 + i * 64
 	
 	# create wall
@@ -110,7 +105,7 @@ func _ready():
 # bat dau mot game moi
 func on_new_game():
 	# reset value
-	time = 0
+	time_input = 0
 	snake_speed = 0.3
 	snake_size = 1
 	snake_body = []
@@ -120,9 +115,9 @@ func on_new_game():
 	snake_change = false
 	
 	# create board color
-	for i in board.size():
-		for j in board[i].size():
-			pixel_board[i][j].modulate = board_color
+	for i in board_data.size():
+		for j in board_data[i].size():
+			get_pixel([i,j]).modulate = board_color
 	
 	# create all object
 	create_wall()
@@ -146,17 +141,24 @@ func on_game_end():
 	await get_tree().create_timer(1,false).timeout
 	btn_new_game.show()
 
+# lay doi tuong pixel tu data
+func get_pixel(board_pos:Array) -> Sprite2D:
+	var x:int = board_pos[1]
+	var y:int = board_pos[0]
+	var pixel:Sprite2D = $Board.get_child(x+(y*board_data[0].size()))
+	return pixel
+
 # tao tuong bao quanh
 func create_wall():
 	# create wall color
 	# ngang
-	for i in board[0].size():
-		pixel_board[0][i].modulate = wall_color
-		pixel_board[board.size()-1][i].modulate = wall_color
+	for i in board_data[0].size():
+		get_pixel([0,i]).modulate = wall_color
+		get_pixel([board_data.size()-1,i]).modulate = wall_color
 	# doc
-	for i in board.size():
-		pixel_board[i][0].modulate = wall_color
-		pixel_board[i][board[0].size()-1].modulate = wall_color
+	for i in board_data.size():
+		get_pixel([i,0]).modulate = wall_color
+		get_pixel([i,board_data[0].size()-1]).modulate = wall_color
 	prints("")
 	prints("Create Wall")
 	prints("")
@@ -165,8 +167,8 @@ func create_wall():
 func create_snake():
 	for i in snake_size:
 		snake_body.append([])
-	pixel_x = randi_range(int(pixel_board.size()/2-1),int(pixel_board.size()/2+1))
-	pixel_y = randi_range(int(pixel_board[0].size()/2-1),int(pixel_board[0].size()/2+1))
+	pixel_x = randi_range(int(board_data.size()/2-1),int(board_data.size()/2+1))
+	pixel_y = randi_range(int(board_data[0].size()/2-1),int(board_data[0].size()/2+1))
 	snake_body[0] = [pixel_x,pixel_y]
 	temp_snake_body = snake_body
 	prints("")
@@ -188,81 +190,6 @@ func create_food():
 	prints("New Speed", snake_speed)
 	prints("")
 
-# xu ly cac phim duoc nhan de di chuyen ran
-func _unhandled_key_input(event):
-	if Input.is_action_pressed("ui_up"):
-		signal_key_changed.emit(0)
-	elif Input.is_action_pressed("ui_down"):
-		signal_key_changed.emit(1)
-	elif Input.is_action_pressed("ui_left"):
-		signal_key_changed.emit(2)
-	elif Input.is_action_pressed("ui_right"):
-		signal_key_changed.emit(3)
-
-# xu ly phim menu
-func _input(event):
-	# new game
-	if event.is_pressed() and game_end == true and btn_new_game.visible == true:
-		game_end = false
-		on_new_game()
-	# pause game
-	elif Input.is_key_label_pressed(KEY_ESCAPE) and game_end == false:
-		if game_pause == false:
-			game_pause = true
-			btn_new_game.visible = game_pause
-		else:
-			game_pause = false
-			btn_new_game.visible = game_pause
-
-# khi co phim duoc nhan
-func on_key_changed(key:int):
-	input_sfx.play()
-	# chi xu ly khi nhan phim khac
-	if key != key_input:
-		if snake_body.size() > 1:
-			# truong hop khi ran doi dau
-			if (key < 2 and key_input < 2) or (key > 1 and key_input > 1):
-				snake_change = true
-			else:
-				snake_change = false
-			# xu ly huong di chuyen khi ran doi dau
-			if snake_change == true:
-				var end0:Array = snake_body[snake_body.size()-2]
-				var end1:Array = snake_body[snake_body.size()-1]
-				# doc
-				if end0[1] == end1[1]:
-					if end0[0] == board[0].size()-1 and end1[0] == 0:
-						key = 0
-					elif end0[0] == 0 and end1[0] == board[0].size()-1:
-						key = 1
-					elif end0[0] > end1[0]:
-						key = 0
-					elif end0[0] < end1[0]:
-						key = 1
-				# ngang
-				elif end0[0] == end1[0]:
-					if end0[1] == 0 and end1[1] == board.size()-1:
-						key = 2
-					elif end0[1] == board.size()-1 and end1[1] == 0:
-						key = 3
-					elif end0[1] > end1[1]:
-						key = 2
-					elif end0[1] < end1[1]:
-						key = 3
-				
-				var temp0:Array = []
-				var temp1:Array = []
-				for i in range(snake_body.size()-1,-1,-1):
-					temp0.append(snake_body[i])
-					temp1.append(temp_snake_body[i])
-				snake_body = temp0.duplicate(true)
-				temp_snake_body = temp1.duplicate(true)
-				temp0 = []
-				temp1 = []
-				pixel_x = snake_body[0][0]
-				pixel_y = snake_body[0][1]
-		key_input = key
-
 # khi ran an: them 1 phan bo phan cho ran, tao 1 diem moi tren map
 func on_snale_eat():
 	eat_sfx.play()
@@ -281,16 +208,16 @@ func on_snale_eat():
 		3:
 			body_x -= s
 	
-	if body_x > board.size()-1 or abs(body_x) > board.size()-1:
+	if body_x > board_data.size()-1 or abs(body_x) > board_data.size()-1:
 		body_x = 0
 		pixel_x = 0
-	if body_y > board[0].size()-1 or abs(body_y) > board[0].size()-1:
+	if body_y > board_data[0].size()-1 or abs(body_y) > board_data[0].size()-1:
 		body_y = 0
 		pixel_y = 0
 	if body_x < 0:
-		body_x = remap(body_x,-(board.size()-1),-1,1,board.size()-1)
+		body_x = remap(body_x,-(board_data.size()-1),-1,1,board_data.size()-1)
 	if body_y < 0:
-		body_y = remap(body_y,-(board[0].size()-1),-1,1,board[0].size()-1)
+		body_y = remap(body_y,-(board_data[0].size()-1),-1,1,board_data[0].size()-1)
 	# them data cho phan bo phan
 	snake_size += 1
 	snake_end_body = [body_x,body_y]
@@ -319,15 +246,92 @@ func on_score_add():
 	score_label.text = "Score: " + str(snake_size - 1)
 	your_score_label.text = "Score: " + str(snake_size - 1)
 
+# xu ly cac phim duoc nhan de di chuyen ran
+func _unhandled_key_input(event):
+	if Input.is_action_pressed("ui_up"):
+		signal_key_changed.emit(0)
+	elif Input.is_action_pressed("ui_down"):
+		signal_key_changed.emit(1)
+	elif Input.is_action_pressed("ui_left"):
+		signal_key_changed.emit(2)
+	elif Input.is_action_pressed("ui_right"):
+		signal_key_changed.emit(3)
+
+# xu ly phim menu
+func _input(event):
+	# new game
+	if event.is_pressed() and game_end == true and btn_new_game.visible == true:
+		input_sfx.play()
+		game_end = false
+		on_new_game()
+	# pause game
+	elif Input.is_key_label_pressed(KEY_ESCAPE) and game_end == false:
+		input_sfx.play()
+		if game_pause == false:
+			game_pause = true
+			btn_new_game.visible = game_pause
+		else:
+			game_pause = false
+			btn_new_game.visible = game_pause
+
+# khi co phim duoc nhan
+func on_key_changed(key:int):
+	input_sfx.play()
+	# chi xu ly khi nhan phim khac
+	if key != key_input:
+		if snake_body.size() > 1:
+			# truong hop khi ran doi dau
+			if (key < 2 and key_input < 2) or (key > 1 and key_input > 1):
+				snake_change = true
+			else:
+				snake_change = false
+			# xu ly huong di chuyen khi ran doi dau
+			if snake_change == true:
+				var end0:Array = snake_body[snake_body.size()-2]
+				var end1:Array = snake_body[snake_body.size()-1]
+				# doc
+				if end0[1] == end1[1]:
+					if end0[0] == board_data[0].size()-1 and end1[0] == 0:
+						key = 0
+					elif end0[0] == 0 and end1[0] == board_data[0].size()-1:
+						key = 1
+					elif end0[0] > end1[0]:
+						key = 0
+					elif end0[0] < end1[0]:
+						key = 1
+				# ngang
+				elif end0[0] == end1[0]:
+					if end0[1] == 0 and end1[1] == board_data.size()-1:
+						key = 2
+					elif end0[1] == board_data.size()-1 and end1[1] == 0:
+						key = 3
+					elif end0[1] > end1[1]:
+						key = 2
+					elif end0[1] < end1[1]:
+						key = 3
+				
+				var temp0:Array = []
+				var temp1:Array = []
+				for i in range(snake_body.size()-1,-1,-1):
+					temp0.append(snake_body[i])
+					temp1.append(temp_snake_body[i])
+				snake_body = temp0.duplicate(true)
+				temp_snake_body = temp1.duplicate(true)
+				temp0 = []
+				temp1 = []
+				pixel_x = snake_body[0][0]
+				pixel_y = snake_body[0][1]
+		key_input = key
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 # xu ly ran di chuyen
 func _process(delta):
 	# chi hoat dong khi game dang chay: game_end = false
 	if game_end == false and game_pause == false:
 		# thoi gian de ran di chuyen: time += delta cho den khi time >= snake_speed thi ran di chuyen
-		time += delta
+		time_input += delta
 		# ran di chuyen
-		if time >= snake_speed:
+		if time_input >= snake_speed:
 			move_sfx.play()
 			# tim vi tri dau moi cua ran sau khi di chuyen
 			# dua vao phim duoc nhan moi nhan
@@ -341,22 +345,22 @@ func _process(delta):
 				3:
 					pixel_y += 1
 			
-			if pixel_x > board.size()-1 or abs(pixel_x) > board.size()-1:
+			if pixel_x > board_data.size()-1 or abs(pixel_x) > board_data.size()-1:
 				pixel_x = 0
 			elif pixel_x < 0:
-				pixel_x = remap(pixel_x,-(board.size()-1),-1,1,board.size()-1)
+				pixel_x = remap(pixel_x,-(board_data.size()-1),-1,1,board_data.size()-1)
 			
-			if pixel_y > board[0].size()-1 or abs(pixel_y) > board[0].size()-1:
+			if pixel_y > board_data[0].size()-1 or abs(pixel_y) > board_data[0].size()-1:
 				pixel_y = 0
 			elif pixel_y < 0:
-				pixel_y = remap(pixel_y,-(board[0].size()-1),-1,1,board[0].size()-1)
+				pixel_y = remap(pixel_y,-(board_data[0].size()-1),-1,1,board_data[0].size()-1)
 			
 			# tim duoc vi tri dau moi cua ran
 			snake_body[0] = [pixel_x, pixel_y]
 			snake_start_body = snake_body[0]
 			
 			# xac dinh dau ran co va cham voi doi tuong nao khong
-			var object:Sprite2D = pixel_board[snake_body[0][0]][snake_body[0][1]]
+			var object:Sprite2D = get_pixel(snake_body[0])
 			# truong hop ran chet
 			if (object.modulate == snake_body_color and snake_change == false) or object.modulate == wall_color:
 				signal_game_end.emit()
@@ -376,14 +380,14 @@ func _process(delta):
 			# xoa diem cuoi cua ran: vi ran di chuyen den diem moi
 			# deleta end body
 			snake_end_body = [temp_snake_body[temp_snake_body.size()-1][0],temp_snake_body[temp_snake_body.size()-1][1]]
-			snake = pixel_board[snake_end_body[0]][snake_end_body[1]]
+			snake = get_pixel(snake_end_body)
 			snake.modulate = board_color
 			
 			# hien thi mau cua ran: tao ra hieu ung ran di chuyen
 			# create head, body display
 			for i in snake_body.size():
 				if snake_body[i].size() > 0:
-					snake = pixel_board[snake_body[i][0]][snake_body[i][1]]
+					snake = get_pixel(snake_body[i])
 					if i == 0:
 						snake.modulate = snake_head_color
 					else:
@@ -393,4 +397,5 @@ func _process(delta):
 			temp_snake_body = snake_body.duplicate(true)
 			
 			# ket thuc viec ran di chuyen
-			time = 0
+			time_input = 0
+
