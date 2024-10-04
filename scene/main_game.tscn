@@ -10,16 +10,16 @@
 [ext_resource type="AudioStream" uid="uid://bbda5fxaoca2h" path="res://sound/move.mp3" id="8_ufcu2"]
 [ext_resource type="AudioStream" uid="uid://ci3alwckohnc2" path="res://sound/button_click.mp3" id="9_2nage"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thllg"]
-bg_color = Color(1, 1, 1, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vccfv"]
+bg_color = Color(0.497474, 0.497474, 0.497474, 1)
 border_width_left = 16
 border_width_top = 16
 border_width_right = 16
 border_width_bottom = 16
 border_color = Color(0, 0, 0, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vccfv"]
-bg_color = Color(0.497474, 0.497474, 0.497474, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thllg"]
+bg_color = Color(1, 1, 1, 1)
 border_width_left = 16
 border_width_top = 16
 border_width_right = 16
@@ -76,20 +76,20 @@ offset_right = 164.0
 offset_bottom = 128.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_pressed_color = Color(0, 0, 0, 1)
 theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("4_oc6gi")
 theme_override_font_sizes/font_size = 100
-theme_override_styles/normal = SubResource("StyleBoxFlat_thllg")
+theme_override_styles/focus = SubResource("StyleBoxFlat_vccfv")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_vccfv")
 theme_override_styles/hover = SubResource("StyleBoxFlat_vccfv")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_vccfv")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_vccfv")
-theme_override_styles/focus = SubResource("StyleBoxFlat_vccfv")
+theme_override_styles/normal = SubResource("StyleBoxFlat_thllg")
 
 [node name="HighScoreLabel" type="Label" parent="ButtonNewGame"]
 layout_mode = 1

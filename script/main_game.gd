@@ -398,4 +398,3 @@ func _process(delta):
 			
 			# ket thuc viec ran di chuyen
 			time_input = 0
-
